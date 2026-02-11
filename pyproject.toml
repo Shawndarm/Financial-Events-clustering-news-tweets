@@ -1,0 +1,15 @@
+[project]
+name = "projet-roland-maeva"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "newspaper3k>=0.2.8",
+    "numpy>=2.4.2",
+    "pandas>=3.0.0",
+    "scikit-learn>=1.8.0",
+    "spacy>=3.8.11",
+    "vadersentiment>=3.3.2",
+    "yfinance>=1.1.0",
+]
