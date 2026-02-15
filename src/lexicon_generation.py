@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import spacy
+import plotly.express as px
+import plotly.graph_objects as go
 import re
 from sklearn.feature_extraction.text import CountVectorizer
 from datetime import timedelta
@@ -70,3 +72,46 @@ def build_daily_lexicon(news_train, prices_map, current_date, output_dir, dtm_ou
     pos_words = lexicon_df[lexicon_df['score'] >= p80].set_index('word')['score'].to_dict()
     neg_words = lexicon_df[lexicon_df['score'] <= p20].set_index('word')['score'].to_dict()
     return {**pos_words, **neg_words}
+######################  Lexicon visualization ######################
+def visualize_daily_lexicon(date_str):
+    """
+    Loads a daily lexicon CSV and plots the f(j) distribution with thresholds.
+    """
+    FILE_PATH = f'../data/processed/daily_lexicons/lexicon_{date_str}.csv'
+
+    # Load and sort data
+    df = pd.read_csv(FILE_PATH)
+    df = df.sort_values('score', ascending=False).reset_index(drop=True)
+    # Re-calculate thresholds for the visualization
+    p20 = np.percentile(df['score'], 20)
+    p80 = np.percentile(df['score'], 80)
+    # Categorize words for coloring
+    df['type'] = 'Neutral'
+    df.loc[df['score'] >= p80, 'type'] = 'Positive'
+    df.loc[df['score'] <= p20, 'type'] = 'Negative'
+
+    # Bar Chart
+    fig = px.bar(
+        df, 
+        x='word', 
+        y='score',
+        color='type',
+        color_discrete_map={'Positive': '#2ecc71', 'Negative': '#e74c3c', 'Neutral': '#bdc3c7'},
+        title=f"Lexicon Sentiment Scores (f_j) - {date_str}",
+        labels={'score': 'Score f(j)', 'word': 'Financial Terms', 'type': 'Category'},
+        hover_data={'score': ':.5f'}
+    )
+    # Add Horizontal Lines for P80 and P20
+    fig.add_hline(y=p80, line_dash="dash", line_color="#27ae60", 
+                  annotation_text=f"P80 Threshold ({p80:.5f})", annotation_position="top right")
+    fig.add_hline(y=p20, line_dash="dash", line_color="#c0392b", 
+                  annotation_text=f"P20 Threshold ({p20:.5f})", annotation_position="bottom right")
+    # Styling: Add Range Slider because there are many words
+    fig.update_layout(
+        xaxis_title="Words (Sorted by Score)",
+        yaxis_title="Marginal Screening Score f(j)",
+        xaxis_tickangle=-45,
+        height=600,
+        template="plotly_white"
+    )
+    fig.show()
