@@ -36,7 +36,7 @@ def run_feature_engineering_pipeline(news_df, lexicon_dir, model):
     unique_days = sorted(news_df['date'].unique())
     
     for current_day in tqdm(unique_days, desc="Feature Engineering"):
-        lex_path = os.path.join(lexicon_dir, f"lexicon_{current_day}.csv")
+        lex_path = os.path.join(lexicon_dir, f"lexicon_filtered_{current_day}.csv")
         
         if os.path.exists(lex_path):
             # Load the lexicon produced for THIS specific day
