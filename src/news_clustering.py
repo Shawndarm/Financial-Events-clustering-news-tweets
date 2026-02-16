@@ -128,13 +128,14 @@ def calculate_event_centroids(X, labels):
 ################## Visualization of HAC clusters in 2D with Plotly ##############
 def visualize_hac_tsne_range(X_full, df_features, start_date, end_date, k, perplexity=30):
     """
-    Filtre les données, effectue le clustering et affiche le t-SNE sur une période donnée.
+    Filters data, do the clustering and shows t-SNE visualization.
     
-    X_full      : Matrice complète des embeddings (N, 300)
-    df_features : DataFrame complet (news_features.csv)
-    start_date  : Date de début 'YYYY-MM-DD'
-    end_date    : Date de fin 'YYYY-MM-DD'
-    k           : Nombre de clusters
+    X_full      : Complete embeddings matrix (N, 300)
+    df_features : Complete embeddingd dataframe (news_features.csv)
+    start_date  : 'YYYY-MM-DD'
+    end_date    : 'YYYY-MM-DD'
+    k           : Number of clusters for HAC
+    perplexity   : t-SNE perplexity parameter (should be < number of samples)
     """
     # Temporal filtering of the DataFrame to match the date range
     mask = (df_features['date'] >= start_date) & (df_features['date'] <= end_date)
