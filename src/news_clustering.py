@@ -9,17 +9,19 @@ import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 import plotly.express as px
 from sklearn.manifold import TSNE
+import plotly.figure_factory as ff
+from scipy.cluster.hierarchy import linkage
+
 
 ################# Clustering evaluation ##############
-def run_clustering_evaluation(X, k_range=range(2, 11)):
+################# Clustering evaluation ##############
+def run_clustering_evaluation(X, k_range=range(2, 11), min_samples=1):
     """
     Evaluates different clustering algorithms using the Silhouette Score.
-    This helps determine the optimal number of clusters (k) and the best method.
+    min_samples: Minimum number of samples required per cluster for HAC stability.
     """
-    # Normalization is required for Euclidean-based methods (like K-Means) 
-    # to behave similarly to Cosine similarity on embeddings.
     X_norm = normalize(X)
-    X_list = X.tolist() # pyclustering requires list format
+    X_list = X.tolist()
 
     results = { 
         'k': [],
@@ -27,49 +29,62 @@ def run_clustering_evaluation(X, k_range=range(2, 11)):
         'K-Means': [],
         'K-Medians': []
     }
+    
     for k in k_range:
         results['k'].append(k)
 
-        # Method A: Agglomerative Clustering (Cosine Similarity)
+        # Method A: Agglomerative Clustering with Stability Logic
         try:
-            model_hac = AgglomerativeClustering(n_clusters=k, metric='cosine', linkage='average')
-            labels_hac = model_hac.fit_predict(X)
-            score_hac = silhouette_score(X, labels_hac, metric='cosine')
-            results['Agglomerative'].append(score_hac)
+            curr_X_hac = X.copy()
+            labels_hac = None
+            # Loop until all clusters meet min_samples requirement
+            while True:
+                if len(curr_X_hac) < k:
+                    labels_hac = None
+                    break
+                model = AgglomerativeClustering(n_clusters=k, metric='cosine', linkage='average')
+                temp_labels = model.fit_predict(curr_X_hac)
+                counts = pd.Series(temp_labels).value_counts()
+                to_remove = counts[counts < min_samples].index
+                
+                if len(to_remove) == 0:
+                    labels_hac = temp_labels
+                    break
+                # Filter out samples from small clusters and retry
+                curr_X_hac = curr_X_hac[~np.isin(temp_labels, to_remove)]
+
+            if labels_hac is not None:
+                score_hac = silhouette_score(curr_X_hac, labels_hac, metric='cosine')
+                results['Agglomerative'].append(score_hac)
+            else:
+                results['Agglomerative'].append(np.nan)
         except Exception as e:
-            print(f"Agglomerative error at k={k}: {e}")
             results['Agglomerative'].append(np.nan)
 
-        # Method B: K-Means++ (Euclidean on Normalized Data)
+        # Method B: K-Means++ (Standard)
         try:
             model_km = KMeans(n_clusters=k, init='k-means++', n_init=10, random_state=42)
             labels_km = model_km.fit_predict(X_norm)
             score_km = silhouette_score(X_norm, labels_km)
             results['K-Means'].append(score_km)
         except Exception as e:
-            print(f"K-Means error at k={k}: {e}")
             results['K-Means'].append(np.nan)
 
-        # Method C: K-Medians (Manhattan Distance)
+        # Method C: K-Medians (Standard)
         try:
-            # pyclustering needs initial medians
             initial_medians = X_list[:k] 
             model_kmed = kmedians(X_list, initial_medians)
             model_kmed.process()           
-            # Convert pyclustering output to sklearn-style labels
             clusters = model_kmed.get_clusters()
             labels_kmed = np.zeros(len(X_list), dtype=int)
             for cluster_idx, cluster in enumerate(clusters):
                 for sample_idx in cluster:
                     labels_kmed[sample_idx] = cluster_idx           
-            # Silhouette score using Manhattan (L1) for K-Medians consistency
             results['K-Medians'].append(silhouette_score(X, labels_kmed, metric='manhattan'))
         except Exception as e:
-            print(f"K-Medians error at k={k}: {e}")
             results['K-Medians'].append(np.nan)
 
-    res = pd.DataFrame(results)
-    return res
+    return pd.DataFrame(results)
 
 ################# Viualization of Silhouette scores ##############
 def plot_clustering_comparison(results_df):
@@ -126,77 +141,134 @@ def calculate_event_centroids(X, labels):
     return centroids
 
 ################## Visualization of HAC clusters in 2D with Plotly ##############
-def visualize_hac_tsne_range(X_full, df_features, start_date, end_date, k, perplexity=30):
+def visualize_hac_tsne_range(X_full, df_features, start_date, end_date, k, perplexity=30, min_samples=1):
     """
-    Filters data, do the clustering and shows t-SNE visualization.
-    
-    X_full      : Complete embeddings matrix (N, 300)
-    df_features : Complete embeddingd dataframe (news_features.csv)
-    start_date  : 'YYYY-MM-DD'
-    end_date    : 'YYYY-MM-DD'
-    k           : Number of clusters for HAC
-    perplexity   : t-SNE perplexity parameter (should be < number of samples)
+    Filters data, applies stability logic, and shows t-SNE visualization.
     """
-    # Temporal filtering of the DataFrame to match the date range
     mask = (df_features['date'] >= start_date) & (df_features['date'] <= end_date)
     sub_df = df_features.loc[mask].copy()
     X_sub = X_full[mask.values] 
     
-    if len(sub_df) < k:
-        print(f"Not enough samples ({len(sub_df)}) to create {k} clusters.")
-        return None
+    # HAC Stability Logic
+    curr_X = X_sub.copy()
+    curr_indices = np.arange(len(sub_df))
+    final_labels = None
+    
+    while True:
+        if len(curr_X) < k:
+            print(f"Could not achieve a stable configuration for k={k}.")
+            return None
+        model = AgglomerativeClustering(n_clusters=k, metric='cosine', linkage='average')
+        temp_labels = model.fit_predict(curr_X)
+        counts = pd.Series(temp_labels).value_counts()
+        to_remove = counts[counts < min_samples].index
+        
+        if len(to_remove) == 0:
+            final_labels = temp_labels
+            break
+        # Remove and update indices to keep metadata in sync
+        mask_stable = ~np.isin(temp_labels, to_remove)
+        curr_X = curr_X[mask_stable]
+        curr_indices = curr_indices[mask_stable]
 
-    # HAC
-    model = AgglomerativeClustering(n_clusters=k, metric='cosine', linkage='average')
-    labels = model.fit_predict(X_sub)
-    sub_df['Cluster'] = labels.astype(str)
+    # Synchronize metadata with the stable articles
+    stable_df = sub_df.iloc[curr_indices].copy()
+    stable_df['Cluster'] = final_labels.astype(str)
 
-    # t-SNE 
-    # Perplexity should be less than the number of samples.
-    actual_perplexity = min(perplexity, max(1, len(sub_df) - 1))
-    tsne = TSNE(
-        n_components=2, 
-        perplexity=actual_perplexity, 
-        random_state=42, 
-        init='pca', 
-        learning_rate='auto'
-    )
-    X_2d = tsne.fit_transform(X_sub)
-    sub_df['X'] = X_2d[:, 0]
-    sub_df['Y'] = X_2d[:, 1]
+    # t-SNE on stable articles
+    actual_perplexity = min(perplexity, max(1, len(curr_X) - 1))
+    tsne = TSNE(n_components=2, perplexity=actual_perplexity, random_state=42, init='pca', learning_rate='auto')
+    X_2d = tsne.fit_transform(curr_X)
+    stable_df['X'] = X_2d[:, 0]
+    stable_df['Y'] = X_2d[:, 1]
 
     # Plotly
     fig = px.scatter(
-        sub_df, 
-        x='X', 
-        y='Y', 
-        color='Cluster',
+        stable_df, x='X', y='Y', color='Cluster',
         hover_data={'headline': True, 'date': True, 'X': False, 'Y': False},
-        title=f"Financial Events Clusters ({start_date} au {end_date})",
-        labels={'Cluster': 'Detected Event'},
+        title=f"Stable Financial Events ({start_date} to {end_date}) | k={k}",
         template="plotly_white",
         color_discrete_sequence=px.colors.qualitative.Dark24
     ) 
     fig.update_traces(marker=dict(size=12, opacity=0.8, line=dict(width=1, color='white')))
-    fig.update_layout(
-        xaxis_title="t-SNE dimension 1",
-        yaxis_title="t-SNE dimension 2",
-        hoverlabel=dict(bgcolor="white", font_size=12)
-    )
+    fig.update_layout(xaxis_title="t-SNE 1", yaxis_title="t-SNE 2")
 
     return fig
 
+################## Final HAC ##############
+from scipy.cluster.hierarchy import linkage
+from sklearn.cluster import AgglomerativeClustering
+import numpy as np
+import pandas as pd
+
+def compute_stable_hac_linkage(X_full, df_features, start_date, end_date, k, min_samples=2):
+    """
+    Computes the stable HAC linkage matrix Z as described in the paper.
+    Returns: Z (Linkage Matrix), stable_headlines (List), and X_stable (Matrix).
+    """
+    # Temporal filtering
+    mask = (df_features['date'] >= start_date) & (df_features['date'] <= end_date)
+    X_sub = X_full[mask.values]
+    sub_df = df_features.loc[mask].copy()
+    
+    # Stable HAC Logic (Stability Condition)
+    curr_X = X_sub.copy()
+    curr_indices = np.arange(len(sub_df))
+    
+    while True:
+        if len(curr_X) < k:
+            return None, None, None # Case where we can't form k stable clusters
+            
+        model = AgglomerativeClustering(n_clusters=k, metric='cosine', linkage='average')
+        temp_labels = model.fit_predict(curr_X)
+        counts = pd.Series(temp_labels).value_counts()
+        to_remove = counts[counts < min_samples].index
+        
+        if len(to_remove) == 0:
+            break # Stable configuration achieved
+            
+        # Remove articles from small clusters and update indices
+        mask_stable = ~np.isin(temp_labels, to_remove)
+        curr_X = curr_X[mask_stable]
+        curr_indices = curr_indices[mask_stable]
+
+    # Compute the Final Linkage Matrix (Z) on the stable subset
+    # Using 'average' and 'cosine' as per the paper
+    Z = linkage(curr_X, method='average', metric='cosine')
+    
+    # Get the headlines of the final stable articles
+    stable_headlines = sub_df.iloc[curr_indices]['headline'].tolist()
+    
+    return Z, stable_headlines, curr_X
 
 
+################## Dendrogram visualization with Plotly ##############
+def plot_hac_dendrogram_plotly(Z, leaf_labels, start_date, end_date):
+    """
+    Visualizes the precomputed linkage matrix Z as an interactive Plotly dendrogram.
+    """
+    if Z is None:
+        print("No stable clustering results to plot.")
+        return None
 
+    # ff.create_dendrogram takes data but we pass our precomputed Z via linkagefun
+    # We pass a dummy array for X because we already have the matrix Z
+    dummy_X = np.zeros((len(leaf_labels), 300))
+    
+    fig = ff.create_dendrogram(
+        dummy_X, 
+        orientation='bottom',
+        labels=leaf_labels,
+        linkagefun=lambda x: Z # We force Plotly to use our stable linkage
+    )
 
+    fig.update_layout(
+        title=f"<b>Stable HAC Dendrogram</b><br><sup>Period: {start_date} to {end_date}</sup>",
+        width=1000, 
+        height=800,
+        template="plotly_white",
+        xaxis=dict(title="Financial News Articles (Stable Subset)"),
+        yaxis=dict(title="Cosine Distance")
+    )
 
-
-
-
-
-
-
-
-
-
+    return fig
