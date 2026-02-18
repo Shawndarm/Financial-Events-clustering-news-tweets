@@ -13,6 +13,7 @@ dependencies = [
     "pandas>=3.0.0",
     "plotly>=6.5.2",
     "pyclustering>=0.10.1.2",
+    "pysentiment2>=0.1.1",
     "scikit-learn>=1.8.0",
     "spacy>=3.8.11",
     "vadersentiment>=3.3.2",
