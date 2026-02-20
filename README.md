@@ -5,7 +5,9 @@
 ![Academic Badge](https://img.shields.io/badge/Université_Paris_1-Panthéon_Sorbonne-maroon)
 
 **Authors:** Roland DUTAUZIET & Maeva N'GUESSAN
+
 **Program:** Master 2 MOSEF - Data Science (Modélisations Statistiques Économiques et Financières) - 2025/2026  
+
 **Context:** Quantitative Finance Project
 
 ## 📖 Project Overview
