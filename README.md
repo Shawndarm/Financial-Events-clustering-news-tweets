@@ -339,9 +339,6 @@ We evaluate performance using **Precision, Recall, and F-Score**.
 ### Silicon Valley Bank Collapse (March 2023)
 Detected strong social amplification prior to major market drawdown.
 
-### AI Boom & Nvidia Rally (May–July 2023)
-Captured technology-driven momentum and social hype.
-
 ### ARM IPO (September 2023)
 Identified anticipation and immediate post-listing reaction.
 
