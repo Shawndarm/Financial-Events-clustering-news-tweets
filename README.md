@@ -134,7 +134,9 @@ $$
 
 Words strongly correlated with market returns (top/bottom percentiles) are retained, while neutral words are discarded.
 
-📌 *Insert Screenshot:* Lexicon distribution or word cloud.
+<img width="999" height="594" alt="image" src="https://github.com/user-attachments/assets/8196d1c1-c2b6-4049-9246-54f37f7c829f" />
+<img width="999" height="594" alt="image" src="https://github.com/user-attachments/assets/8196d1c1-c2b6-4049-9246-54f37f7c829f" />
+
 
 ---
 
