@@ -22,6 +22,7 @@ We applied this methodology to the **S&P 500 index for the year 2023**, a period
 
 The repository is structured to ensure reproducibility and clean code separation.
 
+```text
 Financial-Events-clustering-news-tweets
 ├── data/
 │   ├── for_models/
