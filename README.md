@@ -29,9 +29,9 @@ Financial-Events-clustering-news-tweets
 ├── data/  
 │   ├── for_models/  
 │   │   ├── output/  
-│   │   │   ├── table_3_tweet_assignment_AI.csv        # Tweet–cluster assignments (AI boom, May–July 2023)  
+│   │   │   ├── table_3_tweet_assignment_AI.csv        # Tweet–cluster assignments (IPO ARM, September 2023)  
 │   │   │   ├── table_3_tweet_assignment_SVB.csv       # Tweet–cluster assignments (SVB crisis, March 2023)  
-│   │   │   ├── final_event_signatures_AI.csv          # Event centroids after cleaning (AI period)  
+│   │   │   ├── final_event_signatures_AI.csv          # Event centroids after cleaning (IPO ARM period)  
 │   │   │   ├── final_event_signatures_SVB.csv         # Event centroids after cleaning (SVB period)  
 │   │   │   ├── news_features.csv                      # 300D GloVe embeddings (news)  
 │   │   │   ├── tweets_features.csv                    # 300D GloVe embeddings (tweets)  
@@ -44,14 +44,16 @@ Financial-Events-clustering-news-tweets
 │
 ├── docs/  
 │   ├── Carta_et_al_2021.pdf                           # Reference paper  
-│   ├── Rapport_Event_detection.pdf                    # Full academic report  
+│   ├── Rapport_Event_detection.pdf                    # Our academic report  
 │   └── Slides_Quant_Finance.pdf                       # Project presentation slides  
 │
 ├── img/                                               # Figures used in README & report  
 │   ├── lexicon_generation/  
 │   ├── news_clustering/  
 │   ├── tweet_assignment/  
-│   └── alert_generation/  
+│   ├── alert_generation/
+│   ├── outlier_removal/
+│   └── feature_engineering/
 │
 ├── notebooks/  
 │   ├── 1_lexicon_generation.ipynb  
