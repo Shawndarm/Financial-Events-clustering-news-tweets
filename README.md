@@ -1,4 +1,4 @@
-# Event Detection in Finance by Clustering News and Tweets 📈📰
+# Event Detection in Finance by Clustering News and Tweets
 
 ![Python Badge](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Data Science Badge](https://img.shields.io/badge/Data_Science-NLP_%7C_Clustering-orange)
@@ -8,9 +8,15 @@
 
 **Program:** Master 2 MOSEF - Data Science (Modélisations Statistiques Économiques et Financières) - 2025/2026  
 
-**Context:** Quantitative Finance Project
+## Abstract
 
-## 📖 Project Overview
+This project reproduces and extends the methodology of Carta et al. (2021) for detecting financial events by clustering news articles and measuring their resonance on social media.  
+
+Applied to the S&P 500, financial news and tweets in 2023, the pipeline combines dynamic lexicon generation, document embeddings, hierarchical clustering, and tweet-based alert generation.  
+
+The objective is to automatically identify significant market events and evaluate detection performance against real S&P 500 price movements.
+
+## Project Overview
 
 This project is a reproduction and an extension of the academic paper *"Event Detection in Finance by Clustering News and Tweets"* (Carta et al., 2021). The core objective is to build a robust NLP pipeline capable of detecting major financial events by clustering professional news articles, and then validating these events by measuring the "Social Heat" (public attention) through social media platforms (Twitter/Stocktwits).
 
@@ -20,7 +26,7 @@ We applied this methodology to the **S&P 500 index for the year 2023**, a period
 
 ---
 
-## 🏗️ Project Architecture
+## Project Architecture
 
 The repository is structured to ensure reproducibility and clean code separation.
 
@@ -115,16 +121,6 @@ Install the required packages (Pandas, Numpy, Scikit-learn, Plotly, SciPy, Gensi
 ```Bash
 uv sync
 ```
-
-# Financial Event Detection using News & Tweets (S&P 500 – 2023)
-
-## Abstract
-
-This project reproduces and extends the methodology of Carta et al. (2021) for detecting financial events by clustering news articles and measuring their resonance on social media.  
-
-Applied to the S&P 500 in 2023, the pipeline combines dynamic lexicon generation, document embeddings, hierarchical clustering, and tweet-based alert generation.  
-
-The objective is to automatically identify significant market events and evaluate detection performance against real S&P 500 price movements.
 
 ---
 
