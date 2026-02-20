@@ -219,9 +219,9 @@ To reduce textual noise and retain financially meaningful signals, we construct 
 - A **binary Document-Term Matrix (DTM)** is built over a rolling 4-week window.
 - We compute the **Marginal Screening score** for each term:
 
-\[
+$$\[
 f(j) = \frac{1}{N} \sum_{k=1}^{N} X_k^{(j)} \cdot \delta_k
-\]
+\]$$
 
 Where:
 - \( X_k^{(j)} \in \{0,1\} \) indicates the presence of term \( j \) in article \( k \)
