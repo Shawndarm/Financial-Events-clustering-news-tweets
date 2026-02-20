@@ -192,6 +192,462 @@ Install the required packages (Pandas, Numpy, Scikit-learn, Plotly, SciPy, Gensi
 ```Bash
 uv sync
 ```
+Methodology & Pipeline
 
----
-Methodology & Pipeline StepsOur pipeline follows the 7 steps detailed by Carta et al. Below is the breakdown of each phase applied to our 2023 dataset.Step 1: Lexicon GenerationTo filter out noise and focus on financially meaningful text, we generated a domain-specific lexicon. We computed a Document-Term Matrix (DTM) and used Marginal Screening to select words with high predictive correlation to market movements, avoiding standard stop-words.Insert Screenshot: Word cloud or Lexicon distribution chart here.Step 2: Feature Engineering (Embeddings)We transformed raw text into dense mathematical vectors using Word2Vec.Texts were tokenized.Words outside the generated Lexicon were discarded.The remaining valid Word2Vec vectors were averaged to create a single Document Embedding for each news article.Step 3: News ClusteringWe tested four clustering algorithms: K-Means, Agglomerative Clustering (HAC), DBSCAN, and Gaussian Mixture Models (GMM). We optimized the number of clusters (k) by maximizing the Silhouette Score. Consistent with our report, HAC yielded the best results, forming dense and coherent groups of news.Insert Screenshot: Silhouette Score maximization chart or t-SNE plot (Figure 13a).Step 4: Relevant Words Extraction & Outlier RemovalNot all news clusters represent financial events. We computed the Average TF-IDF for each cluster to extract its top relevant words. Clusters lacking strong financial terminology were classified as "Outliers" and discarded.Insert Screenshot: Bar charts of Key Financial Terms (Figure 14).Step 5: Event SignaturesFor the remaining valid clusters, we computed the Centroid (the mathematical average of all document vectors in that cluster). This centroid becomes the "Signature" of the event, acting as a gravitational pull for the upcoming social media analysis.Insert Screenshot: Cleaned Clusters with Centroids (Figure 13b).Step 6: Tweet AssignmentTo gauge public attention, we linked social media data to the professional news.De-duplication: Removed spam and bot-generated identical tweets.Cosine Similarity: Measured the distance between a tweet's embedding and the Event Signatures.Threshold (delta): Tweets with a similarity score above the delta threshold were assigned to the event.Insert Screenshot: Distribution of Tweet Assignments (Figure 15).Step 7: Alert Generation & EvaluationAn alert is generated if the "Social Heat" (the ratio of assigned tweets to the total daily tweets) exceeds a specific threshold.To evaluate the model's accuracy, we calculated a Ground Truth based on the S&P 500 weekly variation:$$ \Delta_d = \frac{|close(d+7) - close(d)|}{close(d)} $$Days with $\Delta_d > 0.02$ were marked as event intervals. We then computed Precision, Recall, and F-Score.Insert Screenshot: Plotly chart showing the S&P 500 price with Ground Truth zones and social alerts.Case Studies (2023)Our pipeline successfully detected major market shifts in 2023:The Silicon Valley Bank (SVB) Collapse (March 2023): Detected a massive spike in Social Heat just prior to the heavy market drawdown.The AI Boom & Nvidia (May 2023): Captured the technological hype translating into market momentum.ARM IPO (September 2023): Tracked the anticipation and immediate aftermath of a major tech listing.Key FindingsHAC Dominance: Hierarchical Agglomerative Clustering outperformed K-means and DBSCAN in creating semantically meaningful clusters.Recall over Precision: In a trading context, missing a crash (low recall) is worse than a false alarm (low precision). Our algorithm successfully captures almost all ground truth events.Social Hype Delay: The pipeline demonstrated that while news breaks instantly, the "Social Heat" sometimes anticipates or slightly lags behind the price impact, providing valuable alpha.AcknowledgmentsOriginal Authors: Carta, S., et al. (2021). Event Detection in Finance by Clustering News and Tweets.Institution: Université Paris 1 Panthéon-Sorbonne (Master MOSEF).
+Our pipeline reproduces the 7-step framework proposed by Carta et al. (2021), adapted to the 2023 S&P 500 context.
+Each phase is executed sequentially to detect financially significant events from news and social media data.
+
+Step 1 — Lexicon Generation
+
+To reduce textual noise and retain only financially meaningful signals, we construct a dynamic domain-specific lexicon.
+
+A binary Document-Term Matrix (DTM) is built over a rolling 4-week window.
+
+We apply Marginal Screening to compute a score 
+𝑓
+(
+𝑗
+)
+f(j) for each term:
+
+𝑓
+(
+𝑗
+)
+=
+1
+𝑁
+∑
+𝑘
+=
+1
+𝑁
+𝑋
+𝑘
+(
+𝑗
+)
+⋅
+𝛿
+𝑘
+f(j)=
+N
+1
+	​
+
+k=1
+∑
+N
+	​
+
+X
+k
+(j)
+	​
+
+⋅δ
+k
+	​
+
+
+Terms above the 80th percentile (positive impact) and below the 20th percentile (negative impact) are retained.
+
+Neutral words are discarded.
+
+This produces a daily financial lexicon capturing market-relevant vocabulary.
+
+📌 Insert Screenshot: Lexicon distribution plot or Marginal Screening score chart.
+
+Step 2 — Feature Engineering (Embeddings)
+
+Each news article is transformed into a dense numerical representation.
+
+Texts are tokenized and cleaned.
+
+Words not present in the daily lexicon are discarded.
+
+Pre-trained word embeddings are used (GloVe 300D in our implementation).
+
+The document embedding is computed as the average of valid word vectors:
+
+𝑣
+𝑎
+=
+1
+∣
+𝑊
+𝑎
+∣
+∑
+𝑤
+∈
+𝑊
+𝑎
+Embedding
+(
+𝑤
+)
+v
+a
+	​
+
+=
+∣W
+a
+	​
+
+∣
+1
+	​
+
+w∈W
+a
+	​
+
+∑
+	​
+
+Embedding(w)
+
+This converts raw financial text into structured mathematical vectors suitable for clustering.
+
+📌 Insert Screenshot: Example of 300D embeddings table or embedding visualization.
+
+Step 3 — News Clustering
+
+We group news articles into candidate financial events.
+
+Algorithms tested:
+
+K-Means
+
+Agglomerative Clustering (HAC)
+
+K-Medians
+
+(Optional comparison: DBSCAN / GMM depending on experiment)
+
+The number of clusters 
+𝑘
+k is optimized via Silhouette Score maximization:
+
+𝑠
+(
+𝑖
+)
+=
+𝑏
+(
+𝑖
+)
+−
+𝑎
+(
+𝑖
+)
+max
+⁡
+(
+𝑎
+(
+𝑖
+)
+,
+𝑏
+(
+𝑖
+)
+)
+s(i)=
+max(a(i),b(i))
+b(i)−a(i)
+	​
+
+
+Consistent with the original paper, Hierarchical Agglomerative Clustering (cosine distance + average linkage) achieved the best performance, producing compact and semantically coherent clusters.
+
+📌 Insert Screenshot: Silhouette Score comparison or t-SNE cluster visualization.
+
+Step 4 — Relevant Words Extraction & Outlier Removal
+
+Not all clusters represent true financial events.
+
+Relevant Words Extraction
+
+We compute Average TF-IDF per cluster.
+
+The top representative financial terms are extracted.
+
+This provides interpretability for each detected event.
+
+Outlier Removal
+
+We apply a double filtering criterion:
+
+Per-sample Silhouette score
+
+Cosine similarity to cluster centroid
+
+Articles below the percentile threshold in either metric are removed.
+
+Clusters lacking strong financial relevance are discarded.
+
+📌 Insert Screenshot: Bar chart of top financial keywords per cluster.
+
+Step 5 — Event Signatures
+
+For validated clusters, we compute a robust centroid:
+
+𝑐
+𝑘
+=
+median
+(
+{
+𝑣
+𝑎
+:
+𝑎
+∈
+cluster
+𝑘
+}
+)
+c
+k
+	​
+
+=median({v
+a
+	​
+
+:a∈cluster
+k
+	​
+
+})
+
+This centroid represents the Event Signature — a compact mathematical summary of the event.
+
+It acts as a gravitational anchor for social media resonance detection.
+
+📌 Insert Screenshot: Cleaned clusters with centroid markers.
+
+Step 6 — Tweet Assignment
+
+We measure public attention by linking tweets to event signatures.
+
+Process:
+
+De-duplication: Remove identical tweets (anti-spam).
+
+Embedding: Tweets are embedded using the same 300D model.
+
+Cosine Similarity: Each tweet is compared to event centroids.
+
+Threshold 
+𝛿
+δ: Tweets with similarity ≥ threshold are assigned to the event.
+
+sim
+(
+𝑡
+,
+𝑐
+𝑘
+)
+=
+𝑡
+⋅
+𝑐
+𝑘
+∥
+𝑡
+∥
+∥
+𝑐
+𝑘
+∥
+sim(t,c
+k
+	​
+
+)=
+∥t∥∥c
+k
+	​
+
+∥
+t⋅c
+k
+	​
+
+	​
+
+
+This step quantifies social resonance around detected events.
+
+📌 Insert Screenshot: Tweet similarity distribution or assignment visualization.
+
+Step 7 — Alert Generation & Evaluation
+Alert Generation
+
+We define Social Heat:
+
+𝑅
+(
+𝑑
+)
+=
+Assigned Tweets
+𝑑
+Total Tweets
+𝑑
+R(d)=
+Total Tweets
+d
+	​
+
+Assigned Tweets
+d
+	​
+
+	​
+
+
+An alert is triggered if:
+
+𝑅
+(
+𝑑
+)
+>
+𝜃
+R(d)>θ
+Ground Truth Construction
+
+To evaluate performance, we define market event intervals based on weekly S&P 500 variation:
+
+Δ
+𝑑
+=
+∣
+𝑐
+𝑙
+𝑜
+𝑠
+𝑒
+(
+𝑑
++
+7
+)
+−
+𝑐
+𝑙
+𝑜
+𝑠
+𝑒
+(
+𝑑
+)
+∣
+𝑐
+𝑙
+𝑜
+𝑠
+𝑒
+(
+𝑑
+)
+Δ
+d
+	​
+
+=
+close(d)
+∣close(d+7)−close(d)∣
+	​
+
+
+Days where:
+
+Δ
+𝑑
+>
+0.02
+Δ
+d
+	​
+
+>0.02
+
+are labeled as event days, and consecutive event days are aggregated into intervals.
+
+Evaluation Metrics
+
+We compute:
+
+Precision
+
+Recall
+
+F-Score
+
+These metrics measure the alignment between generated alerts and true market events.
+
+📌 Insert Screenshot: Plotly chart showing S&P 500 price, ground truth intervals, and social alerts.
+
+Case Studies (2023)
+
+Our pipeline successfully detected major market events:
+
+Silicon Valley Bank Collapse (March 2023)
+
+Sharp spike in Social Heat
+
+Strong clustering structure
+
+Detected before major market drawdown
+
+AI Boom & Nvidia Rally (May–July 2023)
+
+Technology-related clusters
+
+Strong resonance between news and tweets
+
+Captured market momentum shift
+
+ARM IPO (September 2023)
+
+Anticipation reflected in clustering
+
+Immediate post-listing social reaction
+
+Key Findings
+HAC Dominance
+
+Hierarchical Agglomerative Clustering consistently outperformed K-Means and other methods in generating semantically coherent clusters.
+
+Recall over Precision
+
+In a trading context, missing a crash (low Recall) is more costly than a false alert (low Precision).
+Our model prioritizes Recall and successfully captures most ground truth events.
+
+Social Hype Dynamics
+
+The pipeline shows that:
+
+News breaks instantly.
+
+Social Heat sometimes anticipates or slightly lags price impact.
+
+This temporal asymmetry may provide exploitable alpha signals.
+
+Acknowledgments
+
+Original Authors:
+Carta, S., et al. (2021). Event Detection in Finance by Clustering News and Tweets.
+
+Institution:
+Université Paris 1 Panthéon-Sorbonne — Master 2 MOSEF (Quantitative Finance)
