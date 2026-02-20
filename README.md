@@ -134,8 +134,10 @@ $$
 
 Words strongly correlated with market returns (top/bottom percentiles) are retained, while neutral words are discarded.
 
-<img width="999" height="594" alt="image" src="https://github.com/user-attachments/assets/8196d1c1-c2b6-4049-9246-54f37f7c829f" />
-<img width="999" height="594" alt="image" src="https://github.com/user-attachments/assets/8196d1c1-c2b6-4049-9246-54f37f7c829f" />
+<p align="center">
+  <img src="img/1_lexicon_generation/lexicon_SVB.png" width="650">
+</p>
+*Figure — Lexicon Sentiment scores on March 10th 2023.*
 
 
 ---
