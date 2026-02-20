@@ -160,34 +160,35 @@ Financial-Events-clustering-news-tweets
     # Locked dependency versions ensuring reproducible environments.
 ```
 
+---
 
-Installation & Setup
+## Installation & Setup
+
 We use uv, an extremely fast Python package and project manager written in Rust, to handle our virtual environment and dependencies.
 
-1. Install uv
+### 1. Install uv
 If you haven't installed uv yet, run:
 
 ```Bash
 # On Windows (PowerShell)
-powershell -c "irm [https://astral.sh/uv/install.ps1](https://astral.sh/uv/install.ps1) | iex"
-
+pip install uv
 # On macOS/Linux
 curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | sh
 ```
-2. Setup the Virtual Environment
-Navigate to the project directory and create the environment:
+### 2. Setup the Virtual Environment
+Navigate to the project directory, create and activate the environment:
 
-Bash
+```Bash
 cd Financial-Events-clustering-news-tweets
 uv venv
-Activate the environment:
-
-Windows: .venv\Scripts\activate
-
-macOS/Linux: source .venv/bin/activate
-
+# Windows:
+ .venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+```
 3. Install Dependencies
 Install the required packages (Pandas, Numpy, Scikit-learn, Plotly, SciPy, Gensim):
 
-Bash
-uv pip install -r requirements.txt
+```Bash
+uv sync -- lock
+```
