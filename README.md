@@ -137,7 +137,6 @@ Words strongly correlated with market returns (top/bottom percentiles) are retai
 <p align="center">
   <img src="img/1_lexicon_generation/lexicon_SVB.png" width="650">
 </p>
-*Figure — Lexicon Sentiment scores on March 10th 2023.*
 
 
 ---
@@ -156,6 +155,9 @@ $$
 
 This transforms textual information into numerical form for clustering.
 
+<p align="center">
+  <img src="img/2_feature_engineering/exemple_news_embedding.jpeg" width="650">
+</p>
 ---
 
 # Step 3 — News Clustering
@@ -170,8 +172,15 @@ $$
 
 Hierarchical Agglomerative Clustering (cosine distance + average linkage) consistently produced the most coherent clusters.
 
-📌 *Insert Screenshot:* Silhouette plot or t-SNE visualization.
-
+<p align="center">
+  <img src="img/3_news_clustering/silhouette_scores_SVB.png" width="650">
+</p>
+<p align="center">
+  <img src="img/3_news_clustering/2_clusters_SVB.png" width="650">
+</p>
+<p align="center">
+  <img src="img/3_news_clustering/dendogram_SVB.png" width="650">
+</p>
 ---
 
 # Step 4 — Relevant Words & Cleaning
