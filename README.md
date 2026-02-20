@@ -156,7 +156,7 @@ $$
 This transforms textual information into numerical form for clustering.
 
 <p align="center">
-  <img src="img/2_feature_engineering/exemple_news_embedding.jpeg" width="650">
+  <img src="img/2_feature_engineering/exemple_news_embedding.jpeg" width="600">
 </p>
 ---
 
@@ -192,7 +192,12 @@ To ensure interpretability:
 
 Only semantically coherent financial clusters are retained.
 
-📌 *Insert Screenshot:* Top keywords per cluster.
+<p align="center">
+  <img src="img/4_outlier_removal/2_clusters_SVB_cleaned_with_centroids.png" width="650">
+</p>
+<p align="center">
+  <img src="img/4_outlier_removal/dendogram_SVB_cleaned.png" width="650">
+</p>
 
 ---
 
@@ -213,7 +218,9 @@ Where:
 
 This step improves cluster interpretability and ensures that detected events are characterized by financially meaningful vocabulary.
 
-📌 *Insert Screenshot:* Top keywords per cluster.
+<p align="center">
+  <img src="img/5_relevant_words_extraction/relevant_words_clusters_SVB.png" width="650">
+</p>
 ---
 
 # Step 6 — Tweet Assignment
@@ -226,8 +233,12 @@ $$
 
 Tweets with similarity above a threshold are assigned to the event.
 
-📌 *Insert Screenshot:* Tweet assignment distribution.
-
+<p align="center">
+  <img src="img/6_tweets_asignment/tweets_distribution.png" width="650">
+</p>
+<p align="center">
+  <img src="img/6_tweets_asignment/tweets_assignment_SVB.png" width="650">
+</p>
 ---
 
 # Step 7 — Alert Generation & Evaluation
@@ -262,7 +273,12 @@ are labeled as event periods.
 
 We evaluate performance using **Precision, Recall, and F-Score**.
 
-📌 *Insert Screenshot:* S&P 500 price with ground truth intervals and social alerts.
+<p align="center">
+  <img src="img/7_alert_generation/events_2023_SP500.png" width="650">
+</p>
+<p align="center">
+  <img src="img/7_alert_generation/alerts_SVB.png" width="650">
+</p>
 
 ---
 
