@@ -16,14 +16,6 @@ Applied to the S&P 500, financial news and tweets in 2023, the pipeline combines
 
 The objective is to automatically identify significant market events and evaluate detection performance against real S&P 500 price movements.
 
-## Project Overview
-
-This project is a reproduction and an extension of the academic paper *"Event Detection in Finance by Clustering News and Tweets"* (Carta et al., 2021). The core objective is to build a robust NLP pipeline capable of detecting major financial events by clustering professional news articles, and then validating these events by measuring the "Social Heat" (public attention) through social media platforms (Twitter/Stocktwits).
-
-We applied this methodology to the **S&P 500 index for the year 2023**, a period marked by high volatility, including the Silicon Valley Bank (SVB) collapse and and the ARM IPO.
-
-
-
 ---
 
 ## Project Architecture
