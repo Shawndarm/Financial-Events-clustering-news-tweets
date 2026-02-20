@@ -186,4 +186,35 @@ def plot_tweet_assignment_bars(tweets_df, news_signatures, start_date, end_date,
 
     return fig
 
+#######################" Top Tweets by cluster ###########################"
+def get_event_tweets_summary(assigned_df, signatures_dict):
+    """
+    Crée un tableau récapitulatif des clusters avec le top 3 des tweets associés.
+    Conforme à la Table 3 de Carta et al.
+    """
+    summary_data = []
+    
+    # We iterate over all identified clusters
+    for cluster_id in sorted(signatures_dict.keys()):
+        # Filtering the tweets for this specific cluster
+        cluster_tweets = assigned_df[assigned_df['assigned_event'] == cluster_id]
+        
+        if not cluster_tweets.empty:
+            # Sorting by decreasing similarity the top 3
+            top_3 = cluster_tweets.sort_values(by='similarity', ascending=False).head(3)           
+            formatted_content = "\n\n".join([
+                f"[{row['similarity']:.3f}] {row['full_content']}" 
+                for _, row in top_3.iterrows()
+            ])
+        else:
+            formatted_content = "No tweets assigned"
+            
+        summary_data.append({
+            "Cluster ID": f"Event #{cluster_id}",
+            "Top 3 Representative Tweets": formatted_content
+        })
+    
+    summary_table = pd.DataFrame(summary_data)
+    return summary_table
+
 
