@@ -29,10 +29,10 @@ Financial-Events-clustering-news-tweets
 ├── data/  
 │   ├── for_models/  
 │   │   ├── output/  
-│   │   │   ├── table_3_tweet_assignment_AI.csv        # Tweet–cluster assignments (IPO ARM, September 2023)  
+│   │   │   ├── table_3_tweet_assignment_AI.csv        # Tweet–cluster assignments (IPO ARM, Sept 2023)  
 │   │   │   ├── table_3_tweet_assignment_SVB.csv       # Tweet–cluster assignments (SVB crisis, March 2023)  
-│   │   │   ├── final_event_signatures_AI.csv          # Event centroids after cleaning (IPO ARM period)  
-│   │   │   ├── final_event_signatures_SVB.csv         # Event centroids after cleaning (SVB period)  
+│   │   │   ├── final_event_signatures_AI.csv          # Clean cluster centroids (AI/ARM period)  
+│   │   │   ├── final_event_signatures_SVB.csv         # Clean cluster centroids (SVB period)  
 │   │   │   ├── news_features.csv                      # 300D GloVe embeddings (news)  
 │   │   │   ├── tweets_features.csv                    # 300D GloVe embeddings (tweets)  
 │   │   │   └── tweets_assigned.csv                    # Final tweet-to-event assignments  
@@ -44,35 +44,41 @@ Financial-Events-clustering-news-tweets
 │
 ├── docs/  
 │   ├── Carta_et_al_2021.pdf                           # Reference paper  
-│   ├── Rapport_Event_detection.pdf                    # Our academic report  
-│   └── Slides_Quant_Finance.pdf                       # Project presentation slides  
+│   ├── Rapport_Event_detection.pdf                    # Academic report  
+│   └── Slides_Quant_Finance.pdf                       # Presentation slides  
 │
-├── img/                                               # Figures used in README & report  
-│   ├── lexicon_generation/  
-│   ├── news_clustering/  
-│   ├── tweet_assignment/  
-│   ├── alert_generation/
-│   ├── outlier_removal/
-│   └── feature_engineering/
+├── img/  
+│   ├── 1_lexicon_generation/  
+│   ├── 2_feature_engineering/  
+│   ├── 3_news_clustering/  
+│   ├── 4_outlier_removal/  
+│   ├── 5_relevant_words_extraction/                  
+│   ├── 6_event_signatures/  
+│   ├── 7_tweet_assignment/  
+│   └── 8_alert_generation/  
 │
 ├── notebooks/  
 │   ├── 1_lexicon_generation.ipynb  
 │   ├── 2_feature_engineering.ipynb  
 │   ├── 3_news_clustering.ipynb  
 │   ├── 4_outlier_removal.ipynb  
-│   ├── 6_tweet_assignment.ipynb  
-│   └── 7_alert_generation.ipynb  
+│   ├── 5_relevant_words_extraction.ipynb              
+│   ├── 6_event_signatures.ipynb  
+│   ├── 7_tweet_assignment.ipynb  
+│   └── 8_alert_generation.ipynb  
 │
 ├── src/  
 │   ├── lexicon_generation.py        # Marginal Screening + dynamic lexicon  
 │   ├── feature_engineering.py       # GloVe embeddings (news & tweets)  
 │   ├── news_clustering.py           # HAC + silhouette optimization  
 │   ├── outlier_removal.py           # Silhouette + cosine filtering  
+│   ├── relevant_words_extraction.py # TF-IDF keyword extraction per cluster  
+│   ├── event_signatures.py          # Median-based cluster centroids  
 │   ├── tweet_assignment.py          # Cosine similarity (threshold-based)  
 │   └── alert_generation.py          # Social Heat + Precision/Recall/F-score  
 │
-├── pyproject.toml                   # Dependencies  
-├── uv.lock                          # Reproducible environment  
+├── pyproject.toml  
+├── uv.lock  
 ├── LICENSE  
 └── README.md  
 ```
@@ -189,16 +195,24 @@ Only semantically coherent financial clusters are retained.
 
 ---
 
-# Step 5 — Event Signatures
+# Step 5 — Relevant Words Extraction (TF-IDF)
 
-For each validated cluster, we compute a centroid (event signature):
+We extract representative financial keywords for each cluster using **TF-IDF weighting**:
 
 $$
-c_k = \text{median}(\{v_a\})
+\text{TF-IDF}(t,c) = \text{TF}(t,c) \times \log\left(\frac{N}{DF(t)}\right)
 $$
 
-This vector summarizes the detected event and serves as a reference for social media matching.
+Where:
 
+- \( t \) = term  
+- \( c \) = cluster  
+- \( N \) = total number of documents  
+- \( DF(t) \) = document frequency of term \( t \)
+
+This step improves cluster interpretability and ensures that detected events are characterized by financially meaningful vocabulary.
+
+📌 *Insert Screenshot:* Top keywords per cluster.
 ---
 
 # Step 6 — Tweet Assignment
