@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import os
-from gensim.models import KeyedVectors
-import os
 
 ######### News Embedding Function #########
 def compute_news_embedding(text, lexicon_set, model):

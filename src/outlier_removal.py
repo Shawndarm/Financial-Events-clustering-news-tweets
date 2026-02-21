@@ -2,7 +2,6 @@ from sklearn.metrics import silhouette_samples
 from scipy.spatial.distance import cosine
 import numpy as np
 import plotly.graph_objects as go
-import numpy as np
 from sklearn.manifold import TSNE  
 
 

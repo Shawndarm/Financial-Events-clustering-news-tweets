@@ -1,5 +1,4 @@
 import pandas as pd
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -126,26 +125,6 @@ def generate_alerts_for_period(all_tweets, assigned_tweets, start_date, end_date
     return alert_df.reset_index().rename(columns={'index': 'date'})
 
 
-
-
-def generate_alerts(all_tweets, assigned_tweets, alert_threshold_ratio=0.15):
-    """
-    Calcule le ratio quotidien de tweets assignés et génère l'alerte.
-    """
-    # Total de tweets par jour (dénominateur)
-    daily_total = all_tweets.groupby(all_tweets['date'].dt.date).size()
-    
-    # Tweets assignés par jour (numérateur)
-    daily_assigned = assigned_tweets.groupby(assigned_tweets['date'].dt.date).size()
-    
-    # Calcul du ratio
-    alert_df = pd.DataFrame({'total': daily_total, 'assigned': daily_assigned}).fillna(0)
-    alert_df['ratio'] = alert_df['assigned'] / alert_df['total']
-    
-    # Génération de l'alerte si au dessus du seuil
-    alert_df['is_alert'] = alert_df['ratio'] > alert_threshold_ratio
-    
-    return alert_df.reset_index().rename(columns={'date': 'date'})
 
 
 def evaluate_pipeline_for_period(alert_df, gt_intervals, start_date, end_date):

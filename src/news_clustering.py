@@ -3,10 +3,8 @@ import numpy as np
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from pyclustering.cluster.kmedians import kmedians
 from sklearn.metrics import silhouette_score
-from scipy.spatial.distance import cosine
 from sklearn.preprocessing import normalize
 import plotly.graph_objects as go
-from sklearn.decomposition import PCA
 import plotly.express as px
 from sklearn.manifold import TSNE
 import plotly.figure_factory as ff
@@ -58,7 +56,7 @@ def run_clustering_evaluation(X, k_range=range(2, 11), min_samples=1):
                 results['Agglomerative'].append(score_hac)
             else:
                 results['Agglomerative'].append(np.nan)
-        except Exception as e:
+        except Exception:
             results['Agglomerative'].append(np.nan)
 
         # Method B: K-Means++ (Standard)
@@ -67,7 +65,7 @@ def run_clustering_evaluation(X, k_range=range(2, 11), min_samples=1):
             labels_km = model_km.fit_predict(X_norm)
             score_km = silhouette_score(X_norm, labels_km)
             results['K-Means'].append(score_km)
-        except Exception as e:
+        except Exception:
             results['K-Means'].append(np.nan)
 
         # Method C: K-Medians (Standard)
@@ -81,7 +79,7 @@ def run_clustering_evaluation(X, k_range=range(2, 11), min_samples=1):
                 for sample_idx in cluster:
                     labels_kmed[sample_idx] = cluster_idx           
             results['K-Medians'].append(silhouette_score(X, labels_kmed, metric='manhattan'))
-        except Exception as e:
+        except Exception:
             results['K-Medians'].append(np.nan)
 
     return pd.DataFrame(results)
@@ -196,10 +194,6 @@ def visualize_hac_tsne_range(X_full, df_features, start_date, end_date, k, perpl
     return fig
 
 ################## Final HAC ##############
-from scipy.cluster.hierarchy import linkage
-from sklearn.cluster import AgglomerativeClustering
-import numpy as np
-import pandas as pd
 
 def compute_stable_hac_linkage(X_full, df_features, start_date, end_date, k, min_samples=2):
     """

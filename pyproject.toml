@@ -18,3 +18,8 @@ dependencies = [
     "vadersentiment>=3.3.2",
     "yfinance>=1.2.0",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.2",
+]

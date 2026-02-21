@@ -1,6 +1,5 @@
 #################### Main Functions for data extraction ####################
 import pandas as pd
-import os
 from newspaper import Article
 from tqdm import tqdm
 import numpy as np

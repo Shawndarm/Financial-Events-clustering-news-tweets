@@ -27,7 +27,6 @@ def preprocess_tweets_spacy(text, nlp):
 
 
 ############"#############  Financial Filtering and Embedding Calculation ######################"
-import numpy as np
 
 def filter_and_embed_tweets(df, text_col, lexicon, w2v_model):
     """
